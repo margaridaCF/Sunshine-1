@@ -129,7 +129,7 @@ public class TestDb extends AndroidTestCase {
         for (Map.Entry<String, Object> entry : valueSet) {
             String columnName = entry.getKey();
             int idx = valueCursor.getColumnIndex(columnName);
-            assertFalse(idx == -1);
+            assertFalse(columnName+" does not exist.", idx == -1);
             String expectedValue = entry.getValue().toString();
             assertEquals(expectedValue, valueCursor.getString(idx));
         }
