@@ -16,6 +16,7 @@
 package com.example.android.sunshine.app.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -88,10 +89,28 @@ public class WeatherProvider extends ContentProvider {
                         sortOrder);
                 break;
             case LOCATION_ID:
-                retCursor = null;
+                String argsId[] = {ContentUris.parseId(uri)+""};
+                StringBuilder where = new StringBuilder();
+                where.append(WeatherContract.LocationEntry._ID);
+                where.append("=?");
+                retCursor =  mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.LocationEntry.TABLE_NAME,
+                        projection,
+                        where.toString(),
+                        argsId,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             case LOCATION:
-                retCursor = null;
+                retCursor =  mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.LocationEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Unkwon uri: "+uri);

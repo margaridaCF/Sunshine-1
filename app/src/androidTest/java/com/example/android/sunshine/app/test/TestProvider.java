@@ -17,7 +17,9 @@ package com.example.android.sunshine.app.test;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -70,18 +72,32 @@ public class TestProvider extends AndroidTestCase {
         long weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
         assertTrue(weatherRowId != -1);
 
-        Log.v(LOG_TAG, "Before call to provider.");
         // A cursor is your primary interface to the query results.
         Cursor weatherCursor = mContext.getContentResolver().query(
-                WeatherEntry.CONTENT_URI,  // Table to Query
+                WeatherEntry.CONTENT_URI,
                 null, // leaving "columns" null just returns all the columns.
                 null, // cols for "where" clause
                 null, // values for "where" clause
                 null // columns to group by
         );
 
-        Log.v(LOG_TAG, "After call to provider.");
         TestDb.validateCursor(weatherCursor, weatherValues);
+
+        // Test LocationId
+
+        Uri locationId = Uri.withAppendedPath(LocationEntry.CONTENT_URI, "/" + locationRowId);
+        cursor = mContext.getContentResolver().query(
+                locationId,
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null // columns to group by
+        );
+        StringBuilder row = new StringBuilder();
+        cursor.moveToFirst();
+        DatabaseUtils.dumpCurrentRow(cursor, row);
+        Log.v(LOG_TAG, row.toString());
+        TestDb.validateCursor(cursor, testValues);
 
         dbHelper.close();
     }
