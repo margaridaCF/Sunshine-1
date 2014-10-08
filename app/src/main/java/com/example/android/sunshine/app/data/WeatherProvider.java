@@ -20,8 +20,11 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class WeatherProvider extends ContentProvider {
+
+    public static final String LOG_TAG = WeatherProvider.class.getSimpleName();
 
     // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
@@ -61,8 +64,40 @@ public class WeatherProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] strings, String s, String[] strings2, String s2) {
-        return null;
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Cursor retCursor;
+        int match = sUriMatcher.match(uri);
+        Log.v(LOG_TAG, "On query, match: "+match);
+
+        switch (match){
+            case WEATHER_WITH_LOCATION_AND_DATE:
+                retCursor = null;
+                break;
+            case WEATHER_WITH_LOCATION:
+                retCursor = null;
+                break;
+            case WEATHER:
+                Log.v(LOG_TAG, "On query weather.");
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.WeatherEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case LOCATION_ID:
+                retCursor = null;
+                break;
+            case LOCATION:
+                retCursor = null;
+                break;
+            default:
+                throw new UnsupportedOperationException("Unkwon uri: "+uri);
+        }
+        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return retCursor;
     }
 
     @Override
