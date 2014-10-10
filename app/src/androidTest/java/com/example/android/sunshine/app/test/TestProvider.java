@@ -62,6 +62,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void tQueryJoin(ContentValues testValues, ContentValues weatherValues) {
+        Log.v(LOG_TAG, "tQueryJoin");
         // Test Joins
         // Add the location values in with the weather data so that we can make
         // sure that the join worked and we actually get all the values back
@@ -96,6 +97,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void tQueryLocationSettingAndDate(ContentValues weatherValues){
+        Log.v(LOG_TAG, "tQueryLocationSettingAndDate");
         ContentResolver contentResolver = mContext.getContentResolver();
         assertNotNull(contentResolver);
         Uri uriWeatherLocation = WeatherEntry.buildWeatherLocationWithDate(TEST_LOCATION, TEST_DATE);
@@ -111,6 +113,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void tQueryLocation(ContentValues testValues) {
+        Log.v(LOG_TAG, "tQueryLocation");
         // Test location
         // A cursor is your primary interface to the query results.
         Cursor cursor;
@@ -126,6 +129,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void tQueryLocationId(ContentValues testValues, long locationRowId) {
+        Log.v(LOG_TAG, "tQueryLocationId");
         Cursor cursor;// Test LocationId
         //Uri locationId = Uri.withAppendedPath(LocationEntry.CONTENT_URI, "/" + locationRowId);
         cursor = mContext.getContentResolver().query(
@@ -145,8 +149,10 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void insertWeather(SQLiteDatabase db, ContentValues weatherValues) {
-        long weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
-        assertTrue(weatherRowId != -1);
+        Log.v(LOG_TAG, "insertWeather");
+        Uri uri = mContext.getContentResolver().insert(
+                WeatherEntry.CONTENT_URI,  weatherValues);
+        //long weatherRowId = ContentUris.parseId(uri);
 
         // A cursor is your primary interface to the query results.
         Cursor weatherCursor = mContext.getContentResolver().query(
@@ -162,6 +168,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private long insertNorthPole(SQLiteDatabase db, ContentValues testValues) {
+        Log.v(LOG_TAG, "insertNorthPole");
         long locationRowId;
         locationRowId = db.insert(LocationEntry.TABLE_NAME, null, testValues);
 
