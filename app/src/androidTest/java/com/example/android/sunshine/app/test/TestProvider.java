@@ -57,7 +57,7 @@ public class TestProvider extends AndroidTestCase {
         tQueryLocationId(testValues, locationRowId);
         tQueryLocation(testValues);
         tQueryJoin(testValues, weatherValues);
-
+        tQueryLocationSettingAndDate(weatherValues);
         dbHelper.close();
     }
 
@@ -87,6 +87,21 @@ public class TestProvider extends AndroidTestCase {
         assertNotNull(uriWeatherLocationWithStartDate);
         weatherCursor = contentResolver.query(
                 uriWeatherLocationWithStartDate,
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null  // sort order
+        );
+        TestDb.validateCursor(weatherCursor, weatherValues);
+    }
+
+    private void tQueryLocationSettingAndDate(ContentValues weatherValues){
+        ContentResolver contentResolver = mContext.getContentResolver();
+        assertNotNull(contentResolver);
+        Uri uriWeatherLocation = WeatherEntry.buildWeatherLocationWithDate(TEST_LOCATION, TEST_DATE);
+        assertNotNull(uriWeatherLocation);
+        Cursor weatherCursor = contentResolver.query(
+                uriWeatherLocation,
                 null, // leaving "columns" null just returns all the columns.
                 null, // cols for "where" clause
                 null, // values for "where" clause

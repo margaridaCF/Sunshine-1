@@ -52,6 +52,29 @@ public class WeatherProvider extends ContentProvider {
                     "."+WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND "
             + WeatherContract.WeatherEntry.COLUMN_DATETEXT+" >= ? ";
 
+    private static final String sLocationSettingWithDateSelection =
+            WeatherContract.LocationEntry.TABLE_NAME+
+                    "."+WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND "
+                    + WeatherContract.WeatherEntry.COLUMN_DATETEXT+" = ? ";
+
+    private Cursor getWeatherByLocSettingAndDate(Uri uri, String[] projection, String sortOrder){
+        String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
+        String date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+
+        String selection = sLocationSettingWithDateSelection;
+        String selectionArgs[] = new String[]{locationSetting, date};
+        Log.v(LOG_TAG, "Selection: "+selection);
+
+        // The query builder has the join
+        return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
+    }
+
     private Cursor getWeatherByLocationSetting(Uri uri, String[] projection, String sortOrder) {
         String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
         String startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
@@ -117,11 +140,11 @@ public class WeatherProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
         int match = sUriMatcher.match(uri);
-        Log.v(LOG_TAG, "On query, match: " + match);
+        //Log.v(LOG_TAG, "On query, match: " + match);
 
         switch (match){
             case WEATHER_WITH_LOCATION_AND_DATE:
-                retCursor = null;
+                retCursor = getWeatherByLocSettingAndDate(uri, projection, sortOrder);
                 break;
             case WEATHER_WITH_LOCATION:
                 retCursor = getWeatherByLocationSetting(uri, projection, sortOrder);
