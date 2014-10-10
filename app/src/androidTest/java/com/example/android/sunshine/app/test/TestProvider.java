@@ -17,10 +17,10 @@ package com.example.android.sunshine.app.test;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.test.AndroidTestCase;
@@ -45,15 +45,14 @@ public class TestProvider extends AndroidTestCase {
         // If there's an error in those massive SQL table creation Strings,
         // errors will be thrown here when you try to get a writable database.
         WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues testValues = TestDb.createNorthPoleLocationValues();
 
         long locationRowId;
-        locationRowId = insertNorthPole(db, testValues);
+        locationRowId = insertNorthPole(testValues);
         // Fantastic.  Now that we have a location, add some weather!
         ContentValues weatherValues = TestDb.createWeatherValues(locationRowId);
-        insertWeather(db, weatherValues);
+        insertWeather(weatherValues);
         tQueryLocationId(testValues, locationRowId);
         tQueryLocation(testValues);
         tQueryJoin(testValues, weatherValues);
@@ -148,7 +147,7 @@ public class TestProvider extends AndroidTestCase {
         cursor.close();
     }
 
-    private void insertWeather(SQLiteDatabase db, ContentValues weatherValues) {
+    private void insertWeather(ContentValues weatherValues) {
         Log.v(LOG_TAG, "insertWeather");
         Uri uri = mContext.getContentResolver().insert(
                 WeatherEntry.CONTENT_URI,  weatherValues);
@@ -167,31 +166,25 @@ public class TestProvider extends AndroidTestCase {
         weatherCursor.close();
     }
 
-    private long insertNorthPole(SQLiteDatabase db, ContentValues testValues) {
+    private long insertNorthPole(ContentValues testValues) {
         Log.v(LOG_TAG, "insertNorthPole");
         long locationRowId;
-        locationRowId = db.insert(LocationEntry.TABLE_NAME, null, testValues);
-
-        // Verify we got a row back.
-        assertTrue(locationRowId != -1);
-
+        Uri insertUri = mContext.getContentResolver().insert(LocationEntry.CONTENT_URI, testValues);
+        assertNotNull(insertUri);
         // Data's inserted.  IN THEORY.  Now pull some out to stare at it and verify it made
         // the round trip.
-
         // A cursor is your primary interface to the query results.
-        Cursor cursor = db.query(
-                LocationEntry.TABLE_NAME,  // Table to Query
-                null, // all columns
-                null, // Columns for the "where" clause
-                null, // Values for the "where" clause
-                null, // columns to group by
-                null, // columns to filter by row groups
-                null // sort order
+        Cursor cursor = mContext.getContentResolver().query(
+                LocationEntry.CONTENT_URI,
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null // columns to group by
         );
 
         TestDb.validateCursor(cursor, testValues);
         cursor.close();
-        return locationRowId;
+        return ContentUris.parseId(insertUri);
     }
 
     public void testGetType() {
