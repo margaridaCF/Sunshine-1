@@ -20,6 +20,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
 
@@ -30,6 +31,54 @@ public class WeatherProvider extends ContentProvider {
     // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private WeatherDbHelper mOpenHelper;
+    private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
+    static{
+        sWeatherByLocationSettingQueryBuilder = new SQLiteQueryBuilder();
+        sWeatherByLocationSettingQueryBuilder.setTables(
+                WeatherContract.WeatherEntry.TABLE_NAME + " INNER JOIN " +
+                        WeatherContract.LocationEntry.TABLE_NAME +
+                        " ON " + WeatherContract.WeatherEntry.TABLE_NAME +
+                        "." + WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
+                        " = " + WeatherContract.LocationEntry.TABLE_NAME +
+                        "." + WeatherContract.LocationEntry._ID);
+    }
+
+    private static final String sLocationSettingSelection =
+            WeatherContract.LocationEntry.TABLE_NAME+
+                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? ";
+
+    private static final String sLocationSettingWithStartDateSelection =
+            WeatherContract.LocationEntry.TABLE_NAME+
+                    "."+WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND "
+            + WeatherContract.WeatherEntry.COLUMN_DATETEXT+" >= ? ";
+
+    private Cursor getWeatherByLocationSetting(Uri uri, String[] projection, String sortOrder) {
+        String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
+        String startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
+
+        String[] selectionArgs;
+        String selection;
+
+        if (startDate == null) {
+            selection = sLocationSettingSelection;
+            selectionArgs = new String[]{locationSetting};
+        } else {
+            selectionArgs = new String[]{locationSetting, startDate};
+            selection = sLocationSettingWithStartDateSelection;
+        }
+
+        Log.v(LOG_TAG, "Selection: "+selection);
+        Log.v(LOG_TAG, "Query tables: "+sWeatherByLocationSettingQueryBuilder.getTables());
+
+        return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
 
     private static final int WEATHER = 100;
     private static final int WEATHER_WITH_LOCATION = 101;
@@ -68,17 +117,17 @@ public class WeatherProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
         int match = sUriMatcher.match(uri);
-        Log.v(LOG_TAG, "On query, match: "+match);
+        Log.v(LOG_TAG, "On query, match: " + match);
 
         switch (match){
             case WEATHER_WITH_LOCATION_AND_DATE:
                 retCursor = null;
                 break;
             case WEATHER_WITH_LOCATION:
-                retCursor = null;
+                retCursor = getWeatherByLocationSetting(uri, projection, sortOrder);
                 break;
             case WEATHER:
-                Log.v(LOG_TAG, "On query weather.");
+                //Log.v(LOG_TAG, "On query weather.");
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         WeatherContract.WeatherEntry.TABLE_NAME,
                         projection,
@@ -113,6 +162,7 @@ public class WeatherProvider extends ContentProvider {
                         sortOrder);
                 break;
             default:
+                Log.v(LOG_TAG, "Unkwon uri: "+uri);
                 throw new UnsupportedOperationException("Unkwon uri: "+uri);
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);

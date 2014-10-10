@@ -17,6 +17,7 @@ package com.example.android.sunshine.app.test;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.util.Log;
@@ -122,14 +123,24 @@ public class TestDb extends AndroidTestCase {
     }
 
     static void validateCursor(Cursor valueCursor, ContentValues expectedValues) {
-
-        assertTrue(valueCursor.moveToFirst());
+        boolean moveToFirst = valueCursor.moveToFirst();
+        String errorMsg = "wtf";
+        if(valueCursor.getCount() == 0){
+            errorMsg = "No rows in the cursor";
+        }
+        else {
+            StringBuilder stringBuilder = new StringBuilder();
+            DatabaseUtils.dumpCurrentRow(valueCursor, stringBuilder);
+            errorMsg = stringBuilder.toString();
+        }
+        //Log.v(LOG_TAG, errorMsg);
+        assertTrue(errorMsg, moveToFirst);
 
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
         for (Map.Entry<String, Object> entry : valueSet) {
             String columnName = entry.getKey();
             int idx = valueCursor.getColumnIndex(columnName);
-            assertFalse(columnName+" does not exist.", idx == -1);
+            assertFalse(columnName + " does not exist.", idx == -1);
             String expectedValue = entry.getValue().toString();
             assertEquals(expectedValue, valueCursor.getString(idx));
         }
