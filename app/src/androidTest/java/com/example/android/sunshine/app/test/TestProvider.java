@@ -34,7 +34,7 @@ public class TestProvider extends AndroidTestCase {
 
     public static final String LOG_TAG = TestProvider.class.getSimpleName();
     public static String TEST_LOCATION = "99705";
-    public static String TEST_DATE = "20140612";
+    public static String TEST_DATE = "20141205";
 
     public void testDeleteDb() throws Throwable {
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
