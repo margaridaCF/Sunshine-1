@@ -16,8 +16,13 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -30,9 +35,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.sunshine.app.data.WeatherContract;
+
+import java.util.Date;
+
 
 public class DetailActivity extends ActionBarActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +51,6 @@ public class DetailActivity extends ActionBarActivity {
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,12 +75,39 @@ public class DetailActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class DetailFragment extends Fragment {
+    public static class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
         private static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
         private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
         private String mForecastStr;
+
+        private static final int FORECAST_LOADER = 0;
+        // For the forecast view we're showing only a small subset of the stored data.
+        // Specify the columns we need.
+        private static final String[] FORECAST_COLUMNS = {
+                // In this case the id needs to be fully qualified with a table name, since
+                // the content provider joins the location & weather tables in the background
+                // (both have an _id column)
+                // On the one hand, that's annoying.  On the other, you can search the weather table
+                // using the location set by the user, which is only in the Location table.
+                // So the convenience is worth it.
+                WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
+                WeatherContract.WeatherEntry.COLUMN_DATETEXT,
+                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+                WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+        };
+
+        // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
+        // must change.
+        public static final int COL_WEATHER_ID = 0;
+        public static final int COL_WEATHER_DATE = 1;
+        public static final int COL_WEATHER_DESC = 2;
+        public static final int COL_WEATHER_MAX_TEMP = 3;
+        public static final int COL_WEATHER_MIN_TEMP = 4;
+        public static final int COL_LOCATION_SETTING = 5;
 
         public DetailFragment() {
             setHasOptionsMenu(true);
@@ -83,15 +117,13 @@ public class DetailActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+            getLoaderManager().initLoader(FORECAST_LOADER, null, this);
 
             // The detail Activity called via intent.  Inspect the intent for forecast data.
             Intent intent = getActivity().getIntent();
             if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
                 mForecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
-                ((TextView) rootView.findViewById(R.id.detail_text))
-                        .setText(mForecastStr);
             }
-
             return rootView;
         }
 
@@ -124,5 +156,65 @@ public class DetailActivity extends ActionBarActivity {
                     mForecastStr + FORECAST_SHARE_HASHTAG);
             return shareIntent;
         }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+            // This is called when a new Loader needs to be created.  This
+            // fragment only uses one loader, so we don't care about checking the id.
+
+            // To only show current and future dates, get the String representation for today,
+            // and filter the query to return weather only for dates after or including today.
+            // Only return data after today.
+            String startDate = WeatherContract.getDbDateString(new Date());
+
+            // Sort order:  Ascending, by date.
+            String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATETEXT + " ASC";
+
+            String mLocation = Utility.getPreferredLocation(getActivity());
+            Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                    mLocation, startDate);
+
+            // Now create and return a CursorLoader that will take care of
+            // creating a Cursor for the data being displayed.
+            return new CursorLoader(
+                    getActivity(),
+                    weatherForLocationUri,
+                    FORECAST_COLUMNS,
+                    null,
+                    null,
+                    sortOrder
+            );
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+
+            if(data != null && data.moveToFirst()){
+                TextView dateTV = (TextView) getView().findViewById(R.id.list_item_date_textview);
+                dateTV.setText(Utility.formatDate(data.getString(COL_WEATHER_DATE)));
+                TextView forecastTV = (TextView) getView().findViewById(R.id.list_item_forecast_textview);
+                forecastTV.setText(data.getString(COL_WEATHER_DESC));
+                boolean isMetric = Utility.isMetric(getActivity());
+                TextView highTV = (TextView) getView().findViewById(R.id.list_item_high_textview);
+                highTV.setText(Utility.formatTemperature(data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
+                TextView lowTV = (TextView) getView().findViewById(R.id.list_item_low_textview);
+                lowTV.setText(Utility.formatTemperature(data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> cursorLoader) {
+
+            TextView dateTV = (TextView) getView().findViewById(R.id.list_item_date_textview);
+            dateTV.setText("");
+            TextView forecastTV = (TextView) getView().findViewById(R.id.list_item_forecast_textview);
+            forecastTV.setText("");
+            boolean isMetric = Utility.isMetric(getActivity());
+            TextView highTV = (TextView) getView().findViewById(R.id.list_item_high_textview);
+            highTV.setText(null);
+            TextView lowTV = (TextView) getView().findViewById(R.id.list_item_low_textview);
+            lowTV.setText(null);
+        }
     }
+
 }
