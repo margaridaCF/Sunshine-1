@@ -24,7 +24,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
 
@@ -73,7 +71,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_LOCATION_SETTING = 5;
 
     //private ArrayAdapter<String> mForecastAdapter;
-    private SimpleCursorAdapter mForecastAdapter;
+    private ForecastAdapter mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -116,9 +114,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                              Bundle savedInstanceState) {
 
         // The ArrayAdapter will take data from a source and
-        // use it to populate the ListView it's attached to.
+        /* use it to populate the ListView it's attached to.
         mForecastAdapter =
-                new SimpleCursorAdapter(
+                new ForecastAdapter(
                         getActivity(), // The current context (this activity)
                         R.layout.list_item_forecast, // The name of the layout ID.
                         null,
@@ -130,9 +128,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                                 R.id.list_item_forecast_textview,
                                 R.id.list_item_high_textview,
                                 R.id.list_item_low_textview},
-                        0);
+                        0);*/
+        mForecastAdapter = new ForecastAdapter(getActivity(), null,0);
 
-        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+        /*mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 boolean isMetric = Utility.isMetric(getActivity());
@@ -153,7 +152,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 }
                 return false;
             }
-        });
+        });*/
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
