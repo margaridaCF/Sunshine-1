@@ -14,13 +14,22 @@ import android.widget.TextView;
  * from a {@link Cursor} to a {@link android.widget.ListView}.
  */
 public class ForecastAdapter extends CursorAdapter {
+    private final int VIEW_TYPE_TODAY = 0;
+    private final int VIEW_TYPE_FUTURE_DAY = 1;
+
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+        int viewType = getItemViewType(cursor.getPosition());
+        if (viewType == 0){
+            return LayoutInflater.from(context).inflate(R.layout.list_item_forecast_today, parent, false);
+        }
+        else{
+            return LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+        }
     }
 
     @Override
@@ -58,5 +67,15 @@ public class ForecastAdapter extends CursorAdapter {
         // TODO: Find TextView and set formatted low temperature on it
         TextView lowTempTextView = (TextView)view.findViewById(R.id.list_item_low_textview);
         lowTempTextView.setText(Utility.formatTemperature(low, isMetric));
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return (position == 0) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
     }
 }
