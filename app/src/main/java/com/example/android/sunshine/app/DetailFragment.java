@@ -72,6 +72,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_WIND_SPEED = 8;
     public static final int COL_WIND_DEGREES = 9;
 
+    TextView mDateTV, mDateFullTV, mHighTV, mLowTV, mHumidity, mPressure, mWind, mForecastTV;
+
     public DetailFragment() {
         setHasOptionsMenu(true);
     }
@@ -80,6 +82,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        // This will cache the TextView calls for onLoadFinished
+        mDateTV = (TextView) getView().findViewById(R.id.detail_date_textview);
+        mDateFullTV = (TextView) getView().findViewById(R.id.detail_extendedDate_textview);
+        mForecastTV = (TextView) getView().findViewById(R.id.detail_forecast_textview);
+        mHighTV = (TextView) getView().findViewById(R.id.detail_high_textview);
+        mLowTV = (TextView) getView().findViewById(R.id.detail_low_textview);
+        mHumidity = (TextView)getView().findViewById(R.id.detail_humidity_textview);
+        mPressure = (TextView)getView().findViewById(R.id.detail_pressure_textview);
+        mWind = (TextView)getView().findViewById(R.id.detail_wind_textview);
         return rootView;
     }
 
@@ -166,33 +177,25 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if(data != null && data.moveToFirst()){
             String date = data.getString(COL_WEATHER_DATE);
             // Friendly day
-            TextView dateTV = (TextView) getView().findViewById(R.id.detail_date_textview);
-            dateTV.setText(Utility.getDayName(getActivity(), date));
+            mDateTV.setText(Utility.getDayName(getActivity(), date));
             // Full date
-            TextView dateFullTV = (TextView) getView().findViewById(R.id.detail_extendedDate_textview);
-            dateFullTV.setText(Utility.formatDate(date));
+            mDateFullTV.setText(Utility.formatDate(date));
             // Forecaste
-            TextView forecastTV = (TextView) getView().findViewById(R.id.detail_forecast_textview);
-            forecastTV.setText(data.getString(COL_WEATHER_DESC));
+            mForecastTV.setText(data.getString(COL_WEATHER_DESC));
             // Temperatures
             boolean isMetric = Utility.isMetric(getActivity());
-            TextView highTV = (TextView) getView().findViewById(R.id.detail_high_textview);
-            highTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
-            TextView lowTV = (TextView) getView().findViewById(R.id.detail_low_textview);
-            lowTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
+            mHighTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
+            mLowTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
             // Humidity
-            TextView textView = (TextView)getView().findViewById(R.id.detail_humidity_textview);
             String label = String.format(getActivity().getString(R.string.format_humidity), data.getDouble(COL_HUMIDITY));
-            textView.setText(label);
+            mHumidity.setText(label);
             // Pressure
-            textView = (TextView)getView().findViewById(R.id.detail_pressure_textview);
             label = String.format(getActivity().getString(R.string.format_pressure), data.getDouble(COL_PRESSURE));
-            textView.setText(label);
+            mPressure.setText(label);
             // Wind speed
-            textView = (TextView)getView().findViewById(R.id.detail_wind_textview);
             String formattedWind = Utility.getFormattedWind(getActivity(), data.getFloat(COL_WIND_SPEED), data.getFloat(COL_WIND_DEGREES));
-            Log.v(LOG_TAG, "-"+formattedWind+"-");
-            textView.setText(formattedWind);
+            Log.v(LOG_TAG, "-" + formattedWind + "-");
+            mWind.setText(formattedWind);
         }
     }
 
