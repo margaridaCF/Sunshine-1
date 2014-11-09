@@ -219,9 +219,9 @@ public class DetailActivity extends ActionBarActivity {
                 forecastTV.setText(data.getString(COL_WEATHER_DESC));
                 boolean isMetric = Utility.isMetric(getActivity());
                 TextView highTV = (TextView) getView().findViewById(R.id.detail_high_textview);
-                highTV.setText(Utility.formatTemperature(data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
+                highTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
                 TextView lowTV = (TextView) getView().findViewById(R.id.detail_low_textview);
-                lowTV.setText(Utility.formatTemperature(data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
+                lowTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
             }
         }
 
