@@ -39,7 +39,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     }
 
     private long addLocation(String locationSetting, String cityName, double lat, double lon){
-        Log.v(LOG_TAG, "inserting "+cityName+", with coord: "+lat+", "+lon);
 
         // Check if already exists
         Cursor cursor = context.getContentResolver().query(
@@ -51,13 +50,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         if(cursor.moveToFirst()){
             // Already in the database
-            Log.v(LOG_TAG, "Found in the database");
             int locationIndex = cursor.getColumnIndex(WeatherContract.LocationEntry._ID);
             return cursor.getLong(locationIndex);
         }
         else{
             // Not in the DB, inserting now
-            Log.v(LOG_TAG, "Not in the DB, inserting now");
             ContentValues contentV = new ContentValues();
             contentV.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
             contentV.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, cityName);
@@ -117,8 +114,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             e.printStackTrace();
             return null;
         }
-
-        Log.v(LOG_TAG, OWM_CITY_NAME + ", with coord: " + OWM_COORD_LAT + " " + OWM_COORD_LONG);
 
         // Get and insert the new weather information into the database
         Vector<ContentValues> cVVector = new Vector<ContentValues>(weatherArray.length());
@@ -213,7 +208,10 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         String format = "json";
         String units = "metric";
-        int numDays = 7;
+        int numDays = 15;
+
+
+
 
         try {
             // Construct the URL for the OpenWeatherMap query

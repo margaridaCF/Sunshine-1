@@ -112,50 +112,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // The ArrayAdapter will take data from a source and
-        /* use it to populate the ListView it's attached to.
-        mForecastAdapter =
-                new ForecastAdapter(
-                        getActivity(), // The current context (this activity)
-                        R.layout.list_item_forecast, // The name of the layout ID.
-                        null,
-                        new String[]{WeatherContract.WeatherEntry.COLUMN_DATETEXT,
-                                WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-                                WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-                                WeatherContract.WeatherEntry.COLUMN_MIN_TEMP},
-                        new int[]{R.id.list_item_date_textview,
-                                R.id.list_item_forecast_textview,
-                                R.id.list_item_high_textview,
-                                R.id.list_item_low_textview},
-                        0);*/
         mForecastAdapter = new ForecastAdapter(getActivity(), null,0);
-
-        /*mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                boolean isMetric = Utility.isMetric(getActivity());
-                switch (columnIndex) {
-                    case COL_WEATHER_MAX_TEMP:
-                    case COL_WEATHER_MIN_TEMP: {
-                        // we have to do some formatting and possibly a conversion
-                        ((TextView) view).setText(Utility.formatTemperature(
-                                cursor.getDouble(columnIndex), isMetric));
-                        return true;
-                    }
-                    case COL_WEATHER_DATE: {
-                        String dateString = cursor.getString(columnIndex);
-                        TextView dateView = (TextView) view;
-                        dateView.setText(Utility.formatDate(dateString));
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });*/
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
@@ -171,7 +130,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 }
             }
         });
-
         return rootView;
     }
 

@@ -65,7 +65,6 @@ public class WeatherProvider extends ContentProvider {
 
         String selection = sLocationSettingWithDateSelection;
         String selectionArgs[] = new String[]{locationSetting, date};
-        Log.v(LOG_TAG, "Selection: "+selection);
 
         // The query builder has the join
         return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
@@ -91,10 +90,6 @@ public class WeatherProvider extends ContentProvider {
             selectionArgs = new String[]{locationSetting, startDate};
             selection = sLocationSettingWithStartDateSelection;
         }
-
-        Log.v(LOG_TAG, "Selection: "+selection);
-        Log.v(LOG_TAG, "Query tables: "+sWeatherByLocationSettingQueryBuilder.getTables());
-
         return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
@@ -142,7 +137,6 @@ public class WeatherProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
         int match = sUriMatcher.match(uri);
-        //Log.v(LOG_TAG, "On query, match: " + match);
 
         switch (match){
             case WEATHER_WITH_LOCATION_AND_DATE:
@@ -152,7 +146,6 @@ public class WeatherProvider extends ContentProvider {
                 retCursor = getWeatherByLocationSetting(uri, projection, sortOrder);
                 break;
             case WEATHER:
-                //Log.v(LOG_TAG, "On query weather.");
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         WeatherContract.WeatherEntry.TABLE_NAME,
                         projection,
