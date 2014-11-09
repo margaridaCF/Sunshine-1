@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+    <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 <LinearLayout
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:padding="16dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:padding="16dp">
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
@@ -84,3 +87,4 @@
         android:id="@+id/detail_pressure_textview"
         android:text="Pressure: 1014 hpa"/>
 </LinearLayout>
+</ScrollView>

@@ -52,7 +52,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
+            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+            WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
+            WeatherContract.WeatherEntry.COLUMN_PRESSURE,
+            WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
+            WeatherContract.WeatherEntry.COLUMN_DEGREES
     };
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
@@ -63,6 +67,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_WEATHER_MAX_TEMP = 3;
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_LOCATION_SETTING = 5;
+    public static final int COL_HUMIDITY = 6;
+    public static final int COL_PRESSURE = 7;
+    public static final int COL_WIND_SPEED = 8;
+    public static final int COL_WIND_DEGREES = 9;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -157,20 +165,34 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         if(data != null && data.moveToFirst()){
             String date = data.getString(COL_WEATHER_DATE);
-
+            // Friendly day
             TextView dateTV = (TextView) getView().findViewById(R.id.detail_date_textview);
             dateTV.setText(Utility.getDayName(getActivity(), date));
-
+            // Full date
             TextView dateFullTV = (TextView) getView().findViewById(R.id.detail_extendedDate_textview);
             dateFullTV.setText(Utility.formatDate(date));
-
+            // Forecaste
             TextView forecastTV = (TextView) getView().findViewById(R.id.detail_forecast_textview);
             forecastTV.setText(data.getString(COL_WEATHER_DESC));
+            // Temperatures
             boolean isMetric = Utility.isMetric(getActivity());
             TextView highTV = (TextView) getView().findViewById(R.id.detail_high_textview);
             highTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MAX_TEMP), isMetric));
             TextView lowTV = (TextView) getView().findViewById(R.id.detail_low_textview);
             lowTV.setText(Utility.formatTemperature(getActivity(), data.getDouble(COL_WEATHER_MIN_TEMP), isMetric));
+            // Humidity
+            TextView textView = (TextView)getView().findViewById(R.id.detail_humidity_textview);
+            String label = String.format(getActivity().getString(R.string.format_humidity), data.getDouble(COL_HUMIDITY));
+            textView.setText(label);
+            // Pressure
+            textView = (TextView)getView().findViewById(R.id.detail_pressure_textview);
+            label = String.format(getActivity().getString(R.string.format_pressure), data.getDouble(COL_PRESSURE));
+            textView.setText(label);
+            // Wind speed
+            textView = (TextView)getView().findViewById(R.id.detail_wind_textview);
+            String formattedWind = Utility.getFormattedWind(getActivity(), data.getFloat(COL_WIND_SPEED), data.getFloat(COL_WIND_DEGREES));
+            Log.v(LOG_TAG, "-"+formattedWind+"-");
+            textView.setText(formattedWind);
         }
     }
 
